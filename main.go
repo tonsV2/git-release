@@ -21,6 +21,9 @@ func main() {
 	nextTag := fmt.Sprintf("v%s", version)
 
 	fmt.Printf("Next version: %s\n", nextTag)
+
+	execute("git", "tag", nextTag)
+	execute("git", "push", "--tags")
 }
 
 func execute(param ...string) string {
