@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/blang/semver/v4"
 	"os/exec"
@@ -8,10 +9,14 @@ import (
 )
 
 func main() {
+	var strategy string
+	flag.StringVar(&strategy, "strategy", "minor", "Bump strategy, can be either major, minor or patch")
+	flag.Parse()
+
 	currentVersion := findCurrentVersion()
 	fmt.Printf("Current version: %s\n", currentVersion)
 
-	nextVersion, done := nextVersion(currentVersion)
+	nextVersion, done := nextVersion(currentVersion, strategy)
 	if done {
 		return
 	}
@@ -30,14 +35,22 @@ func gitTag(nextTag string) string {
 	return execute("git", "tag", nextTag)
 }
 
-func nextVersion(tag string) (string, bool) {
+func nextVersion(tag string, strategy string) (string, bool) {
 	version, err := semver.Make(tag[1:])
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", true
 	}
 
-	_ = version.IncrementMinor()
+	switch strategy {
+	case "major":
+		_ = version.IncrementMajor()
+	case "minor":
+		_ = version.IncrementMinor()
+	case "patch":
+		_ = version.IncrementPatch()
+	}
+
 	nextVersion := fmt.Sprintf("v%s", version)
 	return nextVersion, false
 }
