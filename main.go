@@ -28,11 +28,11 @@ func main() {
 }
 
 func gitPushTags() string {
-	return execute("git", "push", "--tags")
+	return execute("git push --tags")
 }
 
 func gitTag(nextTag string) string {
-	return execute("git", "tag", nextTag)
+	return execute(fmt.Sprintf("git tag %s", nextTag))
 }
 
 func nextVersion(tag string, strategy string) (string, bool) {
@@ -56,16 +56,16 @@ func nextVersion(tag string, strategy string) (string, bool) {
 }
 
 func findCurrentVersion() string {
-	tag := execute("git", "describe", "--tags", "--match", "v*", "--abbrev=0")
+	tag := execute("git describe --tags --match v* --abbrev=0")
 	return tag
 }
 
-func execute(param ...string) string {
-	fmt.Println(strings.Join(param, " "))
+func execute(command string) string {
+	fmt.Println(command)
+	fields := strings.Fields(command)
+	app := fields[0]
 
-	app := param[0]
-
-	cmd := exec.Command(app, param[1:]...)
+	cmd := exec.Command(app, fields[1:]...)
 	stdout, err := cmd.Output()
 
 	if err != nil {
