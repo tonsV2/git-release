@@ -11,6 +11,9 @@ import (
 func main() {
 	var strategy string
 	flag.StringVar(&strategy, "strategy", "minor", "Bump strategy, can be either major, minor or patch")
+	var dryRun bool
+	flag.BoolVar(&dryRun, "dry-run", false, "Dry run? Don't execute commands")
+	// safe run? Prompt before pushing
 	flag.Parse()
 
 	currentVersion := findCurrentVersion()
@@ -22,16 +25,22 @@ func main() {
 	}
 	fmt.Printf("Next version: %s\n", nextVersion)
 
-	gitTag(nextVersion)
+	gitTag(nextVersion, dryRun)
 
-	gitPushTags()
+	gitPushTags(dryRun)
 }
 
-func gitPushTags() string {
+func gitPushTags(dryRun bool) string {
+	if dryRun {
+		return ""
+	}
 	return execute("git push --tags")
 }
 
-func gitTag(nextTag string) string {
+func gitTag(nextTag string, dryRun bool) string {
+	if dryRun {
+		return ""
+	}
 	return execute(fmt.Sprintf("git tag %s", nextTag))
 }
 
